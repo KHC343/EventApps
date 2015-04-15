@@ -10,7 +10,7 @@ import Foundation
 
 class Event: PFObject, PFSubclassing
 {
-    override class func load()
+    override class func initialize()
     {
         self.registerSubclass()
     }
@@ -30,6 +30,7 @@ class Event: PFObject, PFSubclassing
     @NSManaged var location : PFGeoPoint!
     ///The file of the photo representing the event (must be converted to UIImage for displaying)
     @NSManaged var eventPicFile : PFFile!
+    @NSManaged var date : NSDate!
 
     ///Queries for all events and returns them in the block callback as [Event]
     class func queryForEvents(completed:(events : [Event]!, error : NSError!) -> Void)
