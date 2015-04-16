@@ -14,6 +14,9 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
     @IBOutlet weak var detailsLabel: UITextField!
     let imagePicker = UIImagePickerController()
     var selectImage = UIImage?()
+    var location = CLLocation?()
+    @IBOutlet weak var datePicker: UIDatePicker!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpCamera()
@@ -25,12 +28,56 @@ class CreateEventViewController: UIViewController, UIImagePickerControllerDelega
         imagePicker.allowsEditing = true
     }
     
-    @IBAction func doneButton(sender: UIBarButtonItem) {
+    func createNewEvent()
+    {
+        let newEvent = Event()
+        newEvent.host = kProfile
+        newEvent.details = detailsLabel.text
+        newEvent.title = titleLabel.text
+        newEvent.eventPicFile = PFFile(data: UIImagePNGRepresentation(selectImage))
+        newEvent.location = PFGeoPoint(location: location)
+        newEvent.date = datePicker.date
+        newEvent.saveInBackgroundWithBlock(nil)
+        
+    }
+    
+    @IBAction func doneButton(sender: UIBarButtonItem)
+    {
         if titleLabel.text == "" || detailsLabel.text == "" || locationLabel.text == "" ||
             selectImage == nil
         {
             showAlert("please do stuff", nil, self)
         }
+        else
+        {
+            dismissViewControllerAnimated(true, completion: { () -> Void in
+                self.geocodeLocationWithBlock({ (succeeded, error) -> Void in
+                    self.createNewEvent()
+                })
+        })
+            
+        }
+        
+    }
+    
+    func geocodeLocationWithBlock(located : (succeeded: Bool, error: NSError!) -> Void)
+    {
+        var geocode = CLGeocoder()
+        geocode.geocodeAddressString(locationLabel.text, completionHandler
+            {
+                (placemarks, error) -> Void in
+                if error != nil
+                {
+                    showAlertWithError(error, self)
+                }
+                else
+                {
+                    let locations : [CLPlacemark] = placemarks as [CLPlacemark]
+                    self.location = locations.first?.location
+                    located(succeeded: true, error: nil)
+                    
+                }
+            })
     }
     
     @IBAction func cancelButton(sender: UIBarButtonItem) {

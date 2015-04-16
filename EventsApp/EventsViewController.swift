@@ -21,16 +21,24 @@ class EventsViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
         else
         {
-            setEventDate()
+            Profile.queryForCurrentUsersProfile({ (profile, error) -> Void in
+                self.setEventDate()
+            })
         }
 }
-    func setEventDate()
+    func setEventData()
     {
         Event.queryForEvents { (events, error) -> Void in
             self.eventsArray = events as [Event]
             self.eventTableView.reloadData()
         }
     }
+    
+    @IBAction func onRefreshTapped(sender: UIBarButtonItem)
+    {
+        setEventData()
+    }
+    
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
     {
